@@ -1,0 +1,14 @@
+
+dir=$1
+
+for vcf in `ls $dir/*gz.vcf`
+do
+  echo "Processing $vcf file...at: "
+  header=${vcf}.headerchrOnly.vcf
+  grep "^#" $vcf > $header # Meta
+  my_variants_tmp=${vcf}.my_variants.tmp
+  grep "^NC_007604" $vcf > $my_variants_tmp # Body
+  my_vcf_chrOnly=${vcf}.NC_007604.vcf
+  cat $header $my_variants_tmp  > $my_vcf_chrOnly
+done; 
+

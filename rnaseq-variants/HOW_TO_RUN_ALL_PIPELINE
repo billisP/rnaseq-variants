@@ -1,0 +1,162 @@
+
+echo "HOW_TO_RUN::I will start the pipeline" 
+
+# input: 
+refSeq=/Users/kbillis/DATA_ANALYSIS_PHD/Synechococcus_elongatus_PCC_7942/PRJNA196229//637000308.fna
+fastq_files=/Users/kbillis/DATA_ANALYSIS_PHD/Synechococcus_elongatus_PCC_7942/PRJNA404081/
+working_dir=/Users/kbillis/DATA_ANALYSIS_PHD/Synechococcus_elongatus_PCC_7942/PRJNA404081/
+gff=/Users/kbillis/google_drive/myProjects/auth/snp/data/637000308.gbk.gff
+
+
+
+# programs: 
+bwa=/Users/kbillis/programs/bwa-0.7.17/bwa  
+#samtools=/Users/kbillis/programs/samtools-1.3.1/samtools 
+samtools=samtools
+bcftools=/Users/kbillis/programs/bcftools-1.3.1/bcftools
+
+
+
+
+
+# work in working dir
+cd $working_dir 
+
+# make indexes
+perl /Users/kbillis/google_drive/myProjects/auth//snp/scripts/make_indexes.pl  $refSeq 
+if [ $? -ne "0" ]
+then
+   echo "HOW_TO_RUN::***! Error, failed to finish index build" 
+   exit 1 
+else
+   echo "HOW_TO_RUN::(-: I did the indexes"
+fi
+
+
+## Check that refSeq exists
+if [ ! -e "$refSeq" ]; then
+   echo "HOW_TO_RUN::***! Reference sequence $refSeq does not exist";
+   exit 1;
+fi
+## Check that index for refSeq exists
+if [ ! -e "${refSeq}.bwt" ]; then
+   echo "HOW_TO_RUN::***! Reference sequence $refSeq does not appear to have been indexed. Please run bwa index on this file before running juicer.";
+   exit 1;
+fi
+echo "HOW_TO_RUN::Index is good" 
+
+
+
+
+# wget https://www.ebi.ac.uk/~kbillis/workshops/NGS_April2018/home/training/fastq/2cell_chr12_R2.fastq
+# wget   http://ftp.sra.ebi.ac.uk/vol1/fastq/SRR807/SRR807396/SRR807396.fastq.gz  --directory-prefix=/Users/kbillis/DATA_ANALYSIS_PHD/Synechococcus_elongatus_PCC_7942/PRJNA196229/
+
+
+
+### LOOP CAN START HERE 
+
+# for fastq_gz in "$fastq_files"/*fastq.gz
+for fastq_gz in `cat $fastq_files/xac`
+do
+  echo "Processing $fastq_gz file...at: "
+  date
+
+  url=$fastq_gz 
+  wget  $fastq_gz  --directory-prefix=$working_dir
+  fastq="${url##*/}"
+  fastq="$working_dir$fastq"
+ 
+  # make some counts:
+  echo "count reads for $fastq_gz : "  
+
+  #if [ ${fastq_gz: -3} == ".gz" ]
+  #then
+    #gunzip -c $fastq 
+  #else 
+    #wc $fastq
+  #fi
+
+  # fastq=`echo $fastq_gz | sed -e "s/.gz//"`
+  echo "Processing $fastq file..."
+
+ 
+
+  # align and make the bam
+  perl /Users/kbillis/google_drive/myProjects/auth//snp/scripts/bwa_samtools.pl $working_dir $fastq $refSeq
+  if [ $? -ne 0 ]
+  then
+     echo "HOW_TO_RUN::***! Error, failed to finish bam build" 
+     exit 1 
+  else
+     echo "HOW_TO_RUN::(-: Mem align of done successfully"
+  fi
+
+  echo "BWA and SAMTOOLs finished..."
+
+  # make the vcf - this might be usefull: https://www.biostars.org/p/122528/ 
+  # find the variant locations
+  # no_dup_file=`echo $fastq | sed -e "s/.fastq/-sorted.bam.dupl.bam/"`
+  no_dup_file=${fastq}-sorted.bam.dupl.bam
+
+  # vcf=`echo $fastq | sed -e "s/.fastq/.vcf/"`
+  vcf=${fastq}.vcf
+  $samtools mpileup  -uf $refSeq  $no_dup_file  | $bcftools call -c -v --output-type b  | $bcftools view -m 2  -o $vcf
+  if [ $? -ne 0 ]
+  then
+    echo "HOW_TO_RUN::***! Error, failed to finish mpileup" 
+    exit 1 
+  else
+    echo "HOW_TO_RUN::(-: mpileup of done successfully"
+  fi
+
+  echo "mpileup  finished. $vcf is ready ..."
+ 
+  # create a vcf with chr only. 
+  header=${vcf}.headerchrOnly.vcf
+
+  grep "^#" $vcf > $header # Meta
+  my_variants_tmp=${vcf}.my_variants.tmp
+  grep "^NC_007604" $vcf > $my_variants_tmp # Body
+  my_vcf_chrOnly=${vcf}.NC_007604.vcf
+  cat $header $my_variants_tmp  > $my_vcf_chrOnly
+
+
+  # find in which gene it is
+  # vcf_tuned_file=`echo $fastq | sed -e "s/.fastq/-tuned.vcf/"`
+  vcf_tuned_file=${fastq}-tuned.vcf
+  perl  /Users/kbillis/google_drive/myProjects/auth/snp/scripts/find_where_is_the_snp.pl  -gff $gff -vcf $vcf -out $vcf_tuned_file
+  if [ $? -ne 0 ]
+  then
+    echo "HOW_TO_RUN::***! Error, failed to finish find_where_is_the_snp.pl" 
+    exit 1 
+  else
+    echo "HOW_TO_RUN::(-: find_where_is_the_snp.pl of done successfully"
+  fi
+
+
+  echo "find_where_is_the_snp finished..."
+
+  # find if it change the aminoacid/peptide sequence   
+  perl /Users/kbillis/google_drive/myProjects/auth/snp/scripts/find_if_the_aminoacid_change.pl -gff $gff -fasta $refSeq -vcf $vcf_tuned_file
+  if [ $? -ne 0 ]
+  then
+    echo "HOW_TO_RUN::***! Error, failed to finish find_if_the_aminoacid_change.pl" 
+    exit 1 
+  else
+    echo "HOW_TO_RUN::(-: find_if_the_aminoacid_change.pl of done successfully"
+  fi
+
+  echo "find_if_the_aminoacid_change.pl finished..."
+
+
+  # make the expression coverage 
+
+  # make the RPKM 
+
+  echo "Finish $fastq_gz file...at: "
+  date
+
+### LOOP CAN END HERE 
+done
+
+

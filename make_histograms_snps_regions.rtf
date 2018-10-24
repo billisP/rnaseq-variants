@@ -1,0 +1,164 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1348\cocoasubrtf170
+{\fonttbl\f0\fswiss\fcharset0 ArialMT;\f1\froman\fcharset0 Times-Roman;\f2\fswiss\fcharset0 Helvetica;
+}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww19700\viewh14580\viewkind0
+\deftab720
+\pard\pardeftab720\sl280
+
+\f0\fs36 \cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 \
+\
+@@@ WORK IN PROGRESS!!!! @@@\
+\
+files_path="~/Downloads/expression_wigs/"
+\f1 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \
+
+\f0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 only_files <- dir(path=files_path, pattern = "*.wig") 
+\f1 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \
+
+\f0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 files = paste(files_path,only_files, sep="")
+\f1 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \
+
+\f0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 snp <- read.csv(files[1], sep=" ", row.names=2, header=TRUE)[c()]
+\f1 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \
+
+\f0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 for (i in 1:length(files)) \{
+\f1 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \
+
+\f0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0  \'a0xx_snp <- read.csv(files[i], sep=" ", header=TRUE)[c(5)]
+\f1 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \
+
+\f0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0  \'a0xx_snp <- cbind(xx_snp)
+\f1 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \
+
+\f0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0  \'a0xx_snp[,]
+\f1 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \
+
+\f0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0  \'a0snp = cbind(snp, xx_snp)
+\f1 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \
+
+\f0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0  \'a0colnames(snp)[i] <- only_files[i]
+\f1 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \
+
+\f0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \}
+\f1 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \
+\pard\pardeftab720
+\cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \
+\pard\pardeftab720\sl280
+
+\f0 \cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 rowSum_snp<-rowSums(snp)
+\f1 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \
+
+\f0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 working_snp<-snp[rowSum_snp>0,]
+\f1 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \
+\pard\pardeftab720
+\cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \
+\pard\pardeftab720\sl280
+
+\f0 \cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 table_to_change<-working_snp
+\f1 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \
+
+\f0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 for (i in 1:dim(table_to_change)[1])\{
+\f1 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \
+
+\f0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0  \'a0\'a0\'a0\'a0\'a0xx<-table_to_change[i,]
+\f1 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \
+
+\f0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0  \'a0\'a0\'a0\'a0\'a0xx_name<-rownames(table_to_change[i,]) 
+\f1 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \
+
+\f0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0  \'a0\'a0\'a0\'a0\'a0xx[xx=="1"]<-xx_name
+\f1 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \
+
+\f0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0  \'a0\'a0\'a0\'a0\'a0table_to_change[i,] <-xx
+\f1 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \
+
+\f0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \}\
+\pard\pardeftab720\sl280
+\cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 working_snp<-table_to_change
+\f1 \expnd0\expndtw0\kerning0
+\
+\pard\pardeftab720
+\cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 \
+\pard\pardeftab720\sl280
+
+\f0 \cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 library(reshape)
+\f1 \expnd0\expndtw0\kerning0
+\
+
+\f0 \expnd0\expndtw0\kerning0
+m1<-melt(working_snp, measure.vars = c("CO2_1_h.wig", "CO2_24_h.wig", "light_1_h.wig", "light_24_h.wig", "NaCl_1_h.wig", "NaCl_24_h.wig", "pH_1_h.wig", "pH_24_h.wig", "Reference.wig", "Temp_1_h.wig", "Temp_24_h.wig"))
+\f1 \expnd0\expndtw0\kerning0
+\
+\pard\pardeftab720
+\cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 \
+\pard\pardeftab720\sl280
+
+\f0 \cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 working_snp[,2]<-as.numeric(as.character(working_snp[,2]))
+\f1 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \
+
+\f0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 working_snp<-m1[working_snp[,2]>0,]
+\f1 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\f2 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 \
+working_snp[,2]<-as.numeric(as.character(working_snp[,2]))\
+\
+ggplot(data=m1, aes(x=value)) + geom_histogram(fill="#880011") + facet_wrap(~variable) + theme.car_chart_SMALLM\
+\
+\
+old way\
+> x<-as.numeric(table_to_change[,1])\
+> hist(as.numeric(table_to_change[x>0,1]), breaks=20, freq = TRUE, main=names[1])\
+\
+\
+}

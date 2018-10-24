@@ -1,0 +1,378 @@
+1 Create plot with background data
+
+
+
+
+
+------------------------
+1 Create plot with background data
+------------------------
+
+1.1 ORIGINAL 
+##############
+http://is-r.tumblr.com/post/33886259146/adding-a-background-to-your-ggplot#notes
+http://www.noamross.net/blog/2012/10/5/ggplot-introduction.html
+# 
+# Adding regions to the background of a ggplot
+doInstall <- TRUE  # Change to FALSE if you don't want packages installed.
+toInstall <- c("foreign", "plyr", "ggplot2", "RColorBrewer")
+if(doInstall){install.packages(toInstall, repos = "http://cran.r-project.org")}
+lapply(toInstall, library, character.only = TRUE)
+ 
+# House DW-NOMINATE Data: http://voteview.org/dwnominate.asp
+# dwNominate <- read.dta("ftp://voteview.com/junkord/HL01111E21_PRES.DTA")
+# install.packages("readstata13")
+library(readstata13)
+dwNominate <- read.dta13("~/Downloads/hl01113d21_PRES.dta") 
+ 
+# Make a re-coded party variable
+dwNominate$majorParty <- "Other"
+dwNominate$majorParty[dwNominate$party == 100] <- "Democrat"
+dwNominate$majorParty[dwNominate$party == 200] <- "Republican"
+dwNominate$Year <- (dwNominate$cong - 1) * 2 + 1789
+head(dwNominate)
+ 
+# This makes a data.frame of the plurality party for each Congressional year
+majorityParty <- ddply(dwNominate, 
+                       .(Year),
+                       function(df){
+                         names(sort(-table(df$majorParty)))[1]
+                         })
+colnames(majorityParty)[2] <- "majorParty"  # These two lines ensure that the
+majorityParty$dwnom1 <- 1  #  majorityParty frame has all of the same colnames
+# as we're using from dwNominate in the plot below, even if
+# majorityParty$dwnom1 is just a placeholder equal to 1.
+ 
+myPalette <- colorRampPalette(brewer.pal(11, "Spectral"))
+zp1 <- ggplot(data = head(dwNominate),  # The "foreground" data
+              aes(x = Year, y = dwnom1))
+zp1 <- zp1 +  geom_rect(data = head(majorityParty),  # The "background" data
+                       aes(xmin = Year,  # and aesthetics...
+                           xmax = Year + 2,
+                           fill = majorParty),
+                           ymin = -2, ymax = 2,
+                       alpha = 2/3)
+zp1 <- zp1 + geom_jitter(size = 1/2)  # The "foreground" geom
+zp1 <- zp1 + theme_bw()
+zp1 <- zp1 + ylim(-1, 1)
+zp1 <- zp1 + scale_x_continuous(expand = c(0, 0))
+zp1 <- zp1 + scale_fill_manual(values = myPalette(9)[c(8, 5, 2)])
+print(zp1)
+
+
+1.2 
+##############
+# my version:
+library(foreign)
+library(plyr)
+library(ggplot2)
+library(RColorBrewer)
+
+
+# col <- c(8,18, 17)
+# test <- dwNominate[1:20,col]
+
+# CO2_1_h.wig	NaCl_1_h.wig	Temp_1_h.wig	light_1_h.wig	pH_1_h.wig
+# CO2_24_h.wig	NaCl_24_h.wig	Temp_24_h.wig	light_24_h.wig	pH_24_h.wig
+
+test = read.csv("~/Downloads/expression_wigs/pH_24_h.wig", header = TRUE, sep = " ")
+# > test[test[,5]>0,]
+#        V1      V2  V3     V4 V5 V6        V7
+# 48032    1   48032 nox   8.64  1  0         .
+# 71492    1   71492 nox   6.98  1  1  T,A,158,
+# 88359    1   88359 nox   6.20  1  1   I,S,87,
+# rowname = position, V1 = 1, V2 = position of SNP, V3 = up/down/no expression >2 <(-2)  , V4 = filter score
+# V5 = SNP? yes or no , V6 = change the aminoacid? yes or no, V7 = what is the change?  
+# > head(test)
+#  X.Exist pos xpres filter snpYN aaYN aaChange
+# 1       1   1   nox      0     0    0        .
+# 2       1   2   nox      0     0    0        .
+# 3       1   3   nox      0     0    0        .
+
+
+myPalette <- colorRampPalette(brewer.pal(11, "Spectral"))
+maxy<-max(test[,4])
+zp1 <- ggplot(data = test,  # The "foreground" data
+              aes(x = pos, y = filter))
+zp1 <- zp1 +  geom_rect(data = test,  # The "background" data
+                       aes(xmin = pos,  # and aesthetics...
+                          xmax = pos + 1,
+                          fill = xpres),
+                          ymin = 0.5, ymax = maxy, 
+                          alpha = 2/3)
+# zp1 <- zp1 + geom_jitter(size = 2/3)  # The "foreground" geom
+# zp1 <- zp1 + geom_jitter()
+zp1 <- zp1 + geom_point(aes(colour = aaYN), size = 2/3)
+# p + geom_point(aes(colour = qsec))   # color according to another column
+zp1 <- zp1 + theme_bw()
+zp1 <- zp1 + ylim(0.5, maxy)
+zp1 <- zp1 + scale_x_continuous(expand = c(0, 0))
+zp1 <- zp1 + scale_fill_manual(values = myPalette(9)[c(8, 5, 2)])
+print(zp1)
+
+> head(test)
+      V1    V2  V3 V4
+1451   1  1451 nox  1
+48032  1 48032 nox  1
+71492  1 71492 nox  1
+
+pdf("~/test_1.pdf")
+print(zp1)
+dev.off()
+
+
+ggsave(file="test.svg", plot=image, width=10, height=8)
+
+mydata = read.csv("~/Downloads/expression_wigs/CO2_1_h.wig", header = FALSE, sep = " ")
+x<-1:dim(mydata)[1]
+plot(x,mydata[,1], cex =0.1)
+lines(x, mydata[,1])
+
+
+
+
+------------------------
+2. SNPs per condition  
+------------------------
+
+2.1 What we want to see
+############## 7 April 2015
+Gia kathe sinthiki (1h kai 24h) :
+- posa SNP, To grafima tha exei ref, 1h, 24h 
+- posa iparxun kai sto ref kai sto sti sinthiki. 
+- posa prokaloun allages stis prwteines.  
+
+Reference:
+- ven diagram metaxi sinthikwn kai ref SNPs iparxun pu?! 
+
+
+# LOAD DATA #
+files_path="~/Downloads/expression_wigs/"
+#read all file names in the directory and save in a vector
+only_files <- dir(path=files_path, pattern = "*.wig") 
+files = paste(files_path,only_files, sep="")
+
+# to see the table (Sense)
+snp <- read.csv(files[1], sep=" ", row.names=2, header=TRUE)[c()]
+snp_aaEff <- read.csv(files[1], sep=" ", row.names=2, header=TRUE)[c()]
+
+for (i in 1:length(files)) {
+  xx_snp <- read.csv(files[i], sep=" ", header=TRUE)[c(5)]
+  xx_snp_aaEff <- read.csv(files[i], sep=" ", header=TRUE)[c(6)]
+  
+  xx_snp <- cbind(xx_snp)
+  snp = cbind(snp, xx_snp)
+  colnames(snp)[i] <- only_files[i]
+
+  xx_snp_aaEff <- cbind(xx_snp_aaEff)
+  snp_aaEff = cbind(snp_aaEff, xx_snp_aaEff)
+  colnames(snp_aaEff)[i] <- only_files[i]
+}
+
+
+# START COUNTING #
+rowS<-rowSums(snp)
+colS<-colSums(snp)
+> colS
+   CO2_1_h.wig   CO2_24_h.wig  light_1_h.wig light_24_h.wig   NaCl_1_h.wig  NaCl_24_h.wig     pH_1_h.wig    pH_24_h.wig  Reference.wig   Temp_1_h.wig  Temp_24_h.wig 
+           178            200            203            180            228            159            206            800            166            246            205 
+CO<-colS[c("Reference.wig","CO2_1_h.wig","CO2_24_h.wig")]
+light<-colS[c("Reference.wig","light_1_h.wig","light_24_h.wig")]
+nacl<-colS[c("Reference.wig","NaCl_1_h.wig","NaCl_24_h.wig")]
+ph<-colS[c("Reference.wig","pH_1_h.wig","pH_24_h.wig")]
+temp<-colS[c("Reference.wig","Temp_1_h.wig","Temp_24_h.wig")]
+
+# snps with aa change effect:
+rowS_aa<-rowSums(snp_aaEff)
+colS_aa<-colSums(snp_aaEff)
+> colS_aa 
+   CO2_1_h.wig   CO2_24_h.wig  light_1_h.wig light_24_h.wig   NaCl_1_h.wig  NaCl_24_h.wig     pH_1_h.wig    pH_24_h.wig  Reference.wig   Temp_1_h.wig  Temp_24_h.wig 
+           119            130            138            118            145            106            130            550            108            150            138 
+CO_aa<-colS_aa[c("Reference.wig","CO2_1_h.wig","CO2_24_h.wig")]
+light_aa<-colS_aa[c("Reference.wig","light_1_h.wig","light_24_h.wig")]
+nacl_aa<-colS_aa[c("Reference.wig","NaCl_1_h.wig","NaCl_24_h.wig")]
+ph_aa<-colS_aa[c("Reference.wig","pH_1_h.wig","pH_24_h.wig")]
+temp_aa<-colS_aa[c("Reference.wig","Temp_1_h.wig","Temp_24_h.wig")]
+
+dataM=cbind(CO, CO_aa)
+> data1
+               CO CO_aa
+Reference.wig 166   108
+CO2_1_h.wig   178   119
+CO2_24_h.wig  200   130
+
+
+dataM=cbind(light, light_aa)
+dataM=cbind(nacl, nacl_aa)
+dataM=cbind(ph, ph_aa)
+dataM=cbind(temp, temp_aa)
+
+
+
+2.2 Explore snps of reference 
+##############
+Which are common and which unique? 
+- 1st do the "LOAD DATA" of the previous step. 
+you have: snp snp_aaEff
+
+- find and select positions with snps: 
+rowS<-rowSums(snp)
+rowS_aa<-rowSums(snp_aaEff)
+snp_only<-snp[rowS>0,]
+snp_aaEff_only<-snp_aaEff[rowS_aa>0,]
+
+# dim(snp[rowS>0,])
+# [1] 1726   11
+# dim(snp_aaEff[rowS_aa>0,])
+# [1] 1106   11
+
+
+
+- replace 1 with rowname 
+table_to_change<-snp_aaEff_only
+for (i in 1:dim(table_to_change)[1]){
+    xx<-table_to_change[i,]
+    xx_name<-rownames(table_to_change[i,]) 
+    xx[xx=="1"]<-xx_name
+    # print(xx)
+    table_to_change[i,] <-xx
+}
+snp_aaEff_only<-table_to_change
+
+table_to_change<-snp_only
+for (i in 1:dim(table_to_change)[1]){
+    xx<-table_to_change[i,]
+    xx_name<-rownames(table_to_change[i,]) 
+    xx[xx=="1"]<-xx_name
+    # print(xx)
+    table_to_change[i,] <-xx
+}
+snp_only<-table_to_change
+
+
+- find reference only
+table_to_change[table_to_change[,9]>0,]
+
+
+2.3 VENN diagrams - conditions and reference 
+##############
+
+- condition and ref
+c3 <- cbind(as.numeric(snp_only$CO2_1_h.wig) , as.numeric(snp_only$CO2_24_h.wig) , as.numeric(snp_only$Reference.wig) )
+a <- vennCounts(c3)
+vennDiagram(a, include = "both", names = c("CO2_1_h", "CO2_24_h", "Reference"), cex = 1, counts.col = "red")
+
+c3 <- cbind(as.numeric(snp_only$light_1_h.wig) , as.numeric(snp_only$light_24_h.wig) , as.numeric(snp_only$Reference.wig) )
+a <- vennCounts(c3)
+vennDiagram(a, include = "both", names = c("light_1_h", "light_24_h", "Reference"), cex = 1, counts.col = "red")
+
+c3 <- cbind(as.numeric(snp_only$NaCl_1_h.wig) , as.numeric(snp_only$NaCl_24_h.wig) , as.numeric(snp_only$Reference.wig) )
+a <- vennCounts(c3)
+vennDiagram(a, include = "both", names = c("NaCl_1_h", "NaCl_24_h", "Reference"), cex = 1, counts.col = "red")
+
+c3 <- cbind(as.numeric(snp_only$pH_1_h.wig) , as.numeric(snp_only$pH_24_h.wig) , as.numeric(snp_only$Reference.wig) )
+a <- vennCounts(c3)
+vennDiagram(a, include = "both", names = c("pH_1_h", "pH_24_h", "Reference"), cex = 1, counts.col = "red")
+
+c3 <- cbind(as.numeric(snp_only$Temp_1_h.wig) , as.numeric(snp_only$Temp_24_h.wig) , as.numeric(snp_only$Reference.wig) )
+a <- vennCounts(c3)
+vennDiagram(a, include = "both", names = c("Temp_1_h", "Temp_24_h", "Reference"), cex = 1, counts.col = "red")
+
+c3 <- cbind(as.numeric(snp_only$CO2_1_h.wig) , as.numeric(snp_only$CO2_24_h.wig) , as.numeric(snp_only$Reference.wig) )
+a <- vennCounts(c3)
+vennDiagram(a, include = "both", names = c("CO2_1_h", "CO2_24_h", "Reference"), cex = 1, counts.col = "red")
+
+c3 <- cbind(as.numeric(snp_only$light_1_h.wig) , as.numeric(snp_only$light_24_h.wig) , as.numeric(snp_only$Reference.wig) )
+a <- vennCounts(c3)
+vennDiagram(a, include = "both", names = c("light_1_h", "light_24_h", "Reference"), cex = 1, counts.col = "red")
+
+c3 <- cbind(as.numeric(snp_only$NaCl_1_h.wig) , as.numeric(snp_only$NaCl_24_h.wig) , as.numeric(snp_only$Reference.wig) )
+a <- vennCounts(c3)
+vennDiagram(a, include = "both", names = c("NaCl_1_h", "NaCl_24_h", "Reference"), cex = 1, counts.col = "red")
+
+c3 <- cbind(as.numeric(snp_only$pH_1_h.wig) , as.numeric(snp_only$pH_24_h.wig) , as.numeric(snp_only$Reference.wig) )
+a <- vennCounts(c3)
+vennDiagram(a, include = "both", names = c("pH_1_h", "pH_24_h", "Reference"), cex = 1, counts.col = "red")
+
+c3 <- cbind(as.numeric(snp_only$Temp_1_h.wig) , as.numeric(snp_only$Temp_24_h.wig) , as.numeric(snp_only$Reference.wig) )
+a <- vennCounts(c3)
+vennDiagram(a, include = "both", names = c("Temp_1_h", "Temp_24_h", "Reference"), cex = 1, counts.col = "red")
+
+
+
+- aa change effect 
+
+c3 <- cbind(as.numeric(snp_aaEff_only$CO2_1_h.wig) , as.numeric(snp_aaEff_only$CO2_24_h.wig) , as.numeric(snp_aaEff_only$Reference.wig) )
+a <- vennCounts(c3)
+vennDiagram(a, include = "both", names = c("CO2_1_h", "CO2_24_h", "Reference"), cex = 1, counts.col = "red")
+
+c3 <- cbind(as.numeric(snp_aaEff_only$light_1_h.wig) , as.numeric(snp_aaEff_only$light_24_h.wig) , as.numeric(snp_aaEff_only$Reference.wig) )
+a <- vennCounts(c3)
+vennDiagram(a, include = "both", names = c("light_1_h", "light_24_h", "Reference"), cex = 1, counts.col = "red")
+
+c3 <- cbind(as.numeric(snp_aaEff_only$NaCl_1_h.wig) , as.numeric(snp_aaEff_only$NaCl_24_h.wig) , as.numeric(snp_aaEff_only$Reference.wig) )
+a <- vennCounts(c3)
+vennDiagram(a, include = "both", names = c("NaCl_1_h", "NaCl_24_h", "Reference"), cex = 1, counts.col = "red")
+
+c3 <- cbind(as.numeric(snp_aaEff_only$pH_1_h.wig) , as.numeric(snp_aaEff_only$pH_24_h.wig) , as.numeric(snp_aaEff_only$Reference.wig) )
+a <- vennCounts(c3)
+vennDiagram(a, include = "both", names = c("pH_1_h", "pH_24_h", "Reference"), cex = 1, counts.col = "red")
+
+c3 <- cbind(as.numeric(snp_aaEff_only$Temp_1_h.wig) , as.numeric(snp_aaEff_only$Temp_24_h.wig) , as.numeric(snp_aaEff_only$Reference.wig) )
+a <- vennCounts(c3)
+vennDiagram(a, include = "both", names = c("Temp_1_h", "Temp_24_h", "Reference"), cex = 1, counts.col = "red")
+
+snp_only$CO2_1_h.wig , snp_only$CO2_24_h.wig , snp_only$Reference.wig
+snp_only$light_1_h.wig , snp_only$light_1_h.wig , snp_only$Reference.wig
+snp_only$NaCl_1_h.wig , snp_only$NaCl_1_h.wig , snp_only$Reference.wig
+snp_only$pH_1_h.wig ,  snp_only$pH_24_h.wig , snp_only$Reference.wig
+snp_only$Temp_1_h.wig , snp_only$Temp_24_h.wig , snp_only$Reference.wig
+
+
+
+2.4 SNPs per gene per condition
+##############
+
+# input: 
+/Users/billis/google_drive/myProjects/auth/snp/results/snps_per_gene_per_condition_no_Int.txt 
+
+- change format 
+(http://www.cookbook-r.com/Manipulating_data/Converting_data_between_wide_and_long_format/)
+snp <- read.csv("/Users/billis/google_drive/myProjects/auth/snp/results/snps_per_gene_per_condition_no_Int.txt", sep="\t", header = FALSE)
+library(tidyr)
+data_wide <- spread(snp, V3, V2)
+
+rownames(data_wide) <- data_wide[,1]
+data_wide[,1] <- NULL
+
+- boxplot
+boxplot(V2 ~ V3, data = snp, lwd = 2, ylab = 'conditions' , cex=0.2)
+stripchart( V2 ~ V3 ,  data = snp, vertical = TRUE, method = "jitter", add = TRUE, pch = 16, col = 'blue', cex = 0.2)
+
+- heatmap of genes with SNPs 
+
+
+
+
+
+
+------------------------
+2  
+------------------------
+1.1 ORIGINAL 
+##############
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
