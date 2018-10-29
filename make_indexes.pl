@@ -6,7 +6,7 @@ use warnings;
 
 # 
 my $ref_Genome  = $ARGV[0]; 
-
+# my $bwa = $ARGV[1]; 
 
 
 
@@ -26,8 +26,8 @@ if ( (-r $genome_fai) and (-r $genome_bwt) ) {
 sub index_genome {
 my $genome = shift; 
 
-my $bwa = "/Users/kbillis/programs/bwa-0.7.17/bwa "; 
-my $samtools = "/Users/kbillis/programs/samtools-1.3.1/samtools "; 
+my $bwa = "bwa "; 
+my $samtools = "samtools "; 
 
 system("$bwa index -a bwtsw $genome");
 	if ( $? == -1 ) {

@@ -38,7 +38,7 @@ sub run_bwa {
 	my $name=$fastq;
 	# $name=~s/.fastq//;
 
-	my $bwa = "/Users/kbillis/programs/bwa-0.7.17/bwa "; 
+	my $bwa = "bwa "; 
 	my $samtools = "samtools "; 
 
 	print "\n## start... sampel: $fastq ... name: $name  ## \n";
@@ -130,7 +130,7 @@ sub remove_duplications_from_bam_file {
 	my $bam_file = shift; 
 	
 	my $bam_no_duplications = $bam_file . ".dupl.bam";  
-	my $samtools = "samtools"; 
+	my $samtools = "samtools "; 
 	print "\ncommand: samtools rmdup (remove duplicationed reads) \n";
 	system("$samtools rmdup -s $bam_file  $bam_no_duplications");
 	if ( $? == -1 ){

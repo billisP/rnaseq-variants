@@ -2,9 +2,10 @@
 echo "HOW_TO_RUN::I will start the pipeline" 
 
 # input: 
+SCRATCH=/Users/kbillis/DATA_ANALYSIS_PHD/Synechococcus_elongatus_PCC_7942/
 refSeq=/Users/kbillis/DATA_ANALYSIS_PHD/Synechococcus_elongatus_PCC_7942/PRJNA196229//637000308.fna
-fastq_files=/Users/kbillis/DATA_ANALYSIS_PHD/Synechococcus_elongatus_PCC_7942/PRJNA404081/
-working_dir=/Users/kbillis/DATA_ANALYSIS_PHD/Synechococcus_elongatus_PCC_7942/PRJNA404081/
+fastq_files=$SCRATCH/PRJNA404081/
+working_dir=$SCRATCH/PRJNA404081/
 gff=/Users/kbillis/google_drive/myProjects/auth/snp/data/637000308.gbk.gff
 
 
@@ -13,9 +14,10 @@ gff=/Users/kbillis/google_drive/myProjects/auth/snp/data/637000308.gbk.gff
 bwa=/Users/kbillis/programs/bwa-0.7.17/bwa  
 #samtools=/Users/kbillis/programs/samtools-1.3.1/samtools 
 samtools=samtools
-bcftools=/Users/kbillis/programs/bcftools-1.3.1/bcftools
+bcftools=bcftools
 
-
+# location of my code: 
+gitCode=/Users/kbillis/google_drive/myProjects/auth//snp/scripts/..../
 
 
 
@@ -23,8 +25,8 @@ bcftools=/Users/kbillis/programs/bcftools-1.3.1/bcftools
 cd $working_dir 
 
 # make indexes
-perl /Users/kbillis/google_drive/myProjects/auth//snp/scripts/make_indexes.pl  $refSeq 
-if [ $? -ne "0" ]
+perl $gitCode/make_indexes.pl  $refSeq 
+if [ $? -ne "0" ]q
 then
    echo "HOW_TO_RUN::***! Error, failed to finish index build" 
    exit 1 
@@ -33,7 +35,7 @@ else
 fi
 
 
-## Check that refSeq exists
+## Check that refSeq dna exists
 if [ ! -e "$refSeq" ]; then
    echo "HOW_TO_RUN::***! Reference sequence $refSeq does not exist";
    exit 1;
@@ -82,7 +84,7 @@ do
  
 
   # align and make the bam
-  perl /Users/kbillis/google_drive/myProjects/auth//snp/scripts/bwa_samtools.pl $working_dir $fastq $refSeq
+  perl $gitCode/bwa_samtools.pl $working_dir $fastq $refSeq
   if [ $? -ne 0 ]
   then
      echo "HOW_TO_RUN::***! Error, failed to finish bam build" 
@@ -124,7 +126,7 @@ do
   # find in which gene it is
   # vcf_tuned_file=`echo $fastq | sed -e "s/.fastq/-tuned.vcf/"`
   vcf_tuned_file=${fastq}-tuned.vcf
-  perl  /Users/kbillis/google_drive/myProjects/auth/snp/scripts/find_where_is_the_snp.pl  -gff $gff -vcf $vcf -out $vcf_tuned_file
+  perl  $gitCode/find_where_is_the_snp.pl  -gff $gff -vcf $vcf -out $vcf_tuned_file
   if [ $? -ne 0 ]
   then
     echo "HOW_TO_RUN::***! Error, failed to finish find_where_is_the_snp.pl" 
@@ -137,7 +139,7 @@ do
   echo "find_where_is_the_snp finished..."
 
   # find if it change the aminoacid/peptide sequence   
-  perl /Users/kbillis/google_drive/myProjects/auth/snp/scripts/find_if_the_aminoacid_change.pl -gff $gff -fasta $refSeq -vcf $vcf_tuned_file
+  perl $gitCode/find_if_the_aminoacid_change.pl -gff $gff -fasta $refSeq -vcf $vcf_tuned_file
   if [ $? -ne 0 ]
   then
     echo "HOW_TO_RUN::***! Error, failed to finish find_if_the_aminoacid_change.pl" 
