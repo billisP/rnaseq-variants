@@ -34,21 +34,25 @@ my $remove_duplications_bam=remove_duplications_from_bam_file($sorted_bam);
 
 sub run_bwa {
 	my ($genome, $fastq) = @_;
-
+	
+	my $del;
 	my $name=$fastq;
 	# $name=~s/.fastq//;
+
+	if (-r $fastq){
+	} else {
+		die("bwa_samtools.pl::fastq files is not exist dude! "); 
+	}
 
 	my $bwa = "bwa "; 
 	my $samtools = "samtools "; 
 
-	print "\n## start... sampel: $fastq ... name: $name  ## \n";
-
-	
-	print "commandsToRun: aln \n";
+	print "\n## start... sample: $fastq ... name: $name  ## \n";
+	print "commandsToRun: aln \n"; 
 	my $sai= $name . ".sai";
 	system("$bwa aln $genome $fastq > $sai");
 	if ( $? == -1 ) {
-		print "command failed: $!\n";
+		die("command failed: $!");
 	} else {
 		printf "\ncommand bwa aln exited with value %d", $? >> 8;
 	}
@@ -66,7 +70,7 @@ sub run_bwa {
 	print "\n----bwa work is done (sam file is ready)\n";
 
 
-	my $del = delete_file($fastq); 
+	$del = delete_file($fastq); 
 	$del = delete_file($sai); 
 
 
@@ -134,7 +138,7 @@ sub remove_duplications_from_bam_file {
 	print "\ncommand: samtools rmdup (remove duplicationed reads) \n";
 	system("$samtools rmdup -s $bam_file  $bam_no_duplications");
 	if ( $? == -1 ){
-		print "command failed: $!\n";
+		die("command failed: $!");
 	}else{
 		printf "\ncommand samtools index exited with value %d", $? >> 8;
 	}
@@ -155,7 +159,7 @@ sub delete_file {
 	system("rm  $file_to_delete ");
 	if ( $? == -1 )
 	{
-		print "rm (delete) command failed: $!\n";
+		die("rm (delete) command failed: $!");
 	} else {
 		printf "\ncommand rm exited with value %d", $? >> 8;
 	}
