@@ -1,0 +1,13 @@
+#!/bin/bash -l
+
+#SBATCH -t 00:03:00  #Set 30 minute time limit
+#SBATCH -q regular   #Submit to the regular QOS
+#SBATCH -L SCRATCH   #Job requires $SCRATCH file system
+#SBATCH -C haswell   #Use Haswell nodes
+
+#SBATCH -o /global/cscratch1/sd/kbillis/out_jobs/bench-%j.output
+#SBATCH -e /global/cscratch1/sd/kbillis/out_jobs/bench-%j.output
+
+
+
+ls -l  /global/homes/k/kbillis/mySoftware/*
