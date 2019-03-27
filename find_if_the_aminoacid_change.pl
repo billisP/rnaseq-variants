@@ -17,16 +17,15 @@ GetOptions(
     # 'out=s'    => \$outfile
 );
 
-print "#load genes! \n";
 my %gff_data_ref = load_gff($genes_infile);    # object uses 0-based coordinates
 
-print "#load fasta! \n";
+print "#find_if_the_aminoacid_change.pl load fasta! \n";
 my %seq_hash = read_fasta($infasta); 
 
-print "#load SNPs! \n";
+print "#find_if_the_aminoacid_change.pl load SNPs! \n";
 my $snps = load_vcf($vcf_infile, \%gff_data_ref, \%seq_hash );
 
-print "\n#all finished! \n";
+print "\n#find_if_the_aminoacid_change.pl all finished! \n";
 
 
 # load gff annotation
@@ -45,7 +44,7 @@ sub load_gff {
             $gene =$1;
             $annotation{$gene} = $_ ;
         } else {
-            warn("load_hash:: I can't find gene_id for $_ ");
+            warn("find_if_the_aminoacid_change.pl load_hash:: I can't find gene_id for $_ ");
             next;
         }
 
@@ -98,29 +97,24 @@ sub load_vcf {
     open(VCF,$vcf_file) or die "Can't open $vcf_file!\n";
     while(<VCF>){
         chomp($_);
-
-print $_ . "\n"; 
         
         if($_=~/^#/){ 
             if ($countIntergenic == 2) {
-                print "it was integenic\n"; 
+                # print "find_if_the_aminoacid_change.pl it was integenic\n"; 
             } elsif ($countIntergenic == 1) {
-                print "things were good\n"; 
+                # print "find_if_the_aminoacid_change.pl things were good\n"; 
             } elsif ($countIntergenic == 100) {
-                print "first one\n"; 
+                # print "find_if_the_aminoacid_change.pl first one\n"; 
             } elsif ($countIntergenic == 0) {
-                print "problem\n"; 
+                # print "find_if_the_aminoacid_change.pl problem\n"; 
             }
-
-        	$countIntergenic = 0; 
+            $countIntergenic = 0; 
             next;
         }
 
         $countIntergenic = $countIntergenic + 1  if (/Interge/);
 
-
         my @data = split(/\t/,$_);
-        
         my $gene = $data[0]; 
         my $chr_snp = $data[1];
         my $snp_position = $data[2];
@@ -134,12 +128,10 @@ print $_ . "\n";
 
 
         my $length = $end - $start; 
-
         my $contig = $seq_hash->{$chr};
         # $start should be -1 to have the correct coordinates!  
-        
         my $seqDNA;
-        my $mutSeqDNA;#  
+        my $mutSeqDNA; 
         
         $data[5]   =~ tr/[A,T,C,G]/[a,t,c,g]/;
 
@@ -153,8 +145,7 @@ print $_ . "\n";
         if ($strand eq "+") {
             # do nothing
             # create a contig with the snp:
-	        substr($mutContig,$snp_position-1,1,$data[5]);        
-
+	    substr($mutContig,$snp_position-1,1,$data[5]);        
             $seqDNA = substr $contig , $start-1, $length ;
             $mutSeqDNA = substr $mutContig , $start-1, $length ; 
         } elsif ($strand eq "-") {
@@ -164,13 +155,12 @@ print $_ . "\n";
             # at first get the DNA of gene, reverse complimentary and 
             $seqDNA = reverse(substr $contig , $start, $length) ;
             # print "ori_reverse_DNA: $seqDNA  \n"; 
-
             $seqDNA =~ tr/[A,T,C,G]/[T,A,G,C]/; 
             # print "tr_reverse_DNA: $seqDNA  \n"; 
             
             # Pay attention here. For snp. Else, I will change the snp. 
             $mutContig =~ tr/[A,T,C,G]/[T,A,G,C]/; 
-	        substr($mutContig,$snp_position-1,1,$data[5]); 
+	    substr($mutContig,$snp_position-1,1,$data[5]); 
             $mutSeqDNA = reverse(substr $mutContig , $start, $length) ;
         }
 
@@ -196,10 +186,8 @@ print $_ . "\n";
         for my $codon ($mutSeqDNA =~ /(...)/g) {
             $transMut = $transMut . codon2aa($codon);
         } 
-
         # print "oriProtein: $trans\n";    
         # print "MutProtein: $transMut\n";
-
 
         # find the difference between original and mutated protein
         my $mask = $trans ^ $transMut; 
@@ -216,12 +204,9 @@ print $_ . "\n";
         }
 
         print OUTNVCF " \n";
-
-       
     }
     close(VCF);
     close(OUTNVCF);
-
 
 return;
 }

@@ -15,6 +15,9 @@ working_dir=$4
 gff=$5
 # location of my code: 
 gitCode=$6
+# chromosome_name 
+# chromosome_name="NC_007604"
+chromosome_name=$7
 
 
 bcftools="bcftools "
@@ -106,8 +109,8 @@ echo "HOW_TO_RUN::Index is good"
 
   grep "^#" $vcf > $header # Meta
   my_variants_tmp=${vcf}.my_variants.tmp
-  grep "^NC_007604" $vcf > $my_variants_tmp # Body
-  my_vcf_chrOnly=${vcf}.NC_007604.vcf
+  grep ${chromosome_name} $vcf > $my_variants_tmp # Body
+  my_vcf_chrOnly=${vcf}.${chromosome_name}.vcf
   cat $header $my_variants_tmp  > $my_vcf_chrOnly
 
 
