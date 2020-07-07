@@ -1,0 +1,122 @@
+Number of variations features: 90
+gene_name:Synpcc7942_0094 -- Allele:T -- Consequence:missense_variant -- cDNA_position:248 -- Protein_position:83 -- Amino_acids:A/V -- Codons:gCa/gTa -- IMPACT:MODERATE
+SRR6202545_Chromosome_91923_C_T,C/T,intergenic_variant,
+$VAR1 = bless( {
+                 'adaptor' => bless( {
+                                       'species_id' => 1,
+                                       '_bind_param_generic_fetch' => undef,
+                                       'db' => bless( {
+                                                        '_species_id' => 1,
+                                                        'include_failed_variations' => 0,
+                                                        '_group' => 'variation',
+                                                        '_is_multispecies' => '',
+                                                        '_dbc' => bless( {
+                                                                           '_driver_object' => bless( {
+                                                                                                        '_parent' => $VAR1->{'adaptor'}{'db'}{'_dbc'}
+                                                                                                      }, 'Bio::EnsEMBL::DBSQL::Driver::mysql' ),
+                                                                           '_port' => 3306,
+                                                                           '_host' => 'localhost',
+                                                                           'connected1368' => 1,
+                                                                           'db_handle1368' => bless( {}, 'DBI::db' ),
+                                                                           '_driver' => 'mysql',
+                                                                           '_password' => sub { "DUMMY" },
+                                                                           '_username' => 'root',
+                                                                           '_dbname' => 'synechococcus_variation_43_96_test',
+                                                                           '_timeout' => 0,
+                                                                           '_query_count' => 5
+                                                                         }, 'Bio::EnsEMBL::DBSQL::DBConnection' ),
+                                                        '_species' => 'synechococcus_elongatus_pcc_7942'
+                                                      }, 'Bio::EnsEMBL::Variation::DBSQL::DBAdaptor' ),
+                                       'dbc' => $VAR1->{'adaptor'}{'db'}{'_dbc'},
+                                       '_is_multispecies' => ''
+                                     }, 'Bio::EnsEMBL::Variation::DBSQL::VariationFeatureAdaptor' ),
+                 'consequence_types' => [
+                                          'intergenic_variant'
+                                        ],
+                 '_source_id' => 2,
+                 'display' => 1,
+                 'variation_name' => 'SRR6202545_Chromosome_91923_C_T',
+                 '_source_name' => 'SRR6202545',
+                 'dbID' => 6,
+                 'minor_allele' => undef,
+                 'start' => 91923,
+                 'minor_allele_count' => undef,
+                 'flank_match' => undef,
+                 'end' => 91923,
+                 'evidence' => [],
+                 'allele_string' => 'C/T',
+                 'class_SO_term' => 'SNV',
+                 'map_weight' => 1,
+                 'strand' => 1,
+                 'slice' => bless( {
+                                     'start' => 1,
+                                     'seq_region_length' => 2695903,
+                                     'end' => 2695903,
+                                     'adaptor' => bless( {
+                                                           'species_id' => 1,
+                                                           'sr_id_cache' => {
+                                                                              '12726' => [
+                                                                                           12726,
+                                                                                           'Chromosome',
+                                                                                           172,
+                                                                                           2695903
+                                                                                         ]
+                                                                            },
+                                                           'db' => bless( {
+                                                                            '_group' => 'core',
+                                                                            'seq_region_cache' => bless( {
+                                                                                                           'name_cache' => {
+                                                                                                                             'Chromosome:172' => $VAR1->{'slice'}{'adaptor'}{'sr_id_cache'}{'12726'}
+                                                                                                                           },
+                                                                                                           'id_cache' => $VAR1->{'slice'}{'adaptor'}{'sr_id_cache'}
+                                                                                                         }, 'Bio::EnsEMBL::Utils::SeqRegionCache' ),
+                                                                            '_is_multispecies' => '',
+                                                                            '_dbc' => bless( {
+                                                                                               '_timeout' => 0,
+                                                                                               '_query_count' => 6,
+                                                                                               '_port' => 3306,
+                                                                                               '_driver_object' => bless( {
+                                                                                                                            '_parent' => $VAR1->{'slice'}{'adaptor'}{'db'}{'_dbc'}
+                                                                                                                          }, 'Bio::EnsEMBL::DBSQL::Driver::mysql' ),
+                                                                                               '_host' => 'localhost',
+                                                                                               'connected1368' => 1,
+                                                                                               'db_handle1368' => bless( {}, 'DBI::db' ),
+                                                                                               '_password' => sub { "DUMMY" },
+                                                                                               '_driver' => 'mysql',
+                                                                                               '_username' => 'root',
+                                                                                               '_dbname' => 'synec_bacteria_11_collection_core_43_96_empty'
+                                                                                             }, 'Bio::EnsEMBL::DBSQL::DBConnection' ),
+                                                                            '_species' => 'synechococcus_elongatus_pcc_7942',
+                                                                            '_species_id' => 1
+                                                                          }, 'Bio::EnsEMBL::DBSQL::DBAdaptor' ),
+                                                           'lrg_region_test' => undef,
+                                                           'dbc' => $VAR1->{'slice'}{'adaptor'}{'db'}{'_dbc'},
+                                                           'sr_name_cache' => $VAR1->{'slice'}{'adaptor'}{'db'}{'seq_region_cache'}{'name_cache'},
+                                                           '_is_multispecies' => ''
+                                                         }, 'Bio::EnsEMBL::DBSQL::SliceAdaptor' ),
+                                     'strand' => 1,
+                                     'seq_region_name' => 'Chromosome',
+                                     'coord_system' => undef
+                                   }, 'Bio::EnsEMBL::Slice' ),
+                 'overlap_consequences' => [
+                                             bless( {
+                                                      'display_term' => 'INTERGENIC',
+                                                      'SO_accession' => 'SO:0001628',
+                                                      'description' => 'A sequence variant located in the intergenic region, between genes',
+                                                      'impact' => 'MODIFIER',
+                                                      'rank' => '38',
+                                                      'label' => 'intergenic variant',
+                                                      'tier' => '4',
+                                                      'include' => {
+                                                                     'within_feature' => 0
+                                                                   },
+                                                      'is_default' => 1,
+                                                      'SO_term' => 'intergenic_variant'
+                                                    }, 'Bio::EnsEMBL::Variation::OverlapConsequence' )
+                                           ],
+                 'current_consequence_method' => 'SO_term',
+                 '_variation_id' => 6,
+                 'is_somatic' => 0,
+                 'clinical_significance' => [],
+                 'minor_allele_frequency' => undef
+               }, 'Bio::EnsEMBL::Variation::VariationFeature' );

@@ -1,4 +1,8 @@
 
+
+
+# THIS CODE CREATE multiHISTOGRAMs and used in the poster # 
+
 library(vcfR)
 library(ggplot2)
 library(reshape)
@@ -13,50 +17,31 @@ gff <- read.table("/Users/kbillis/google_drive/myProjects/auth/snp/data/63700030
 gff2 <- gff[grep("NC_007604", gff[,1]),]
 gff3 <- gff2[grep("gene", gff2[,3]),]
 
-# get max length and prepare a list 
-max_bp=length(dna2)
-result <- vector("list", max_bp) 
-
-# paly
-chrom <- create.chromR(name='NC_007604', vcf=vcf, seq=dna2, ann=gff3)
-chrom <- proc.chromR(chrom, verbose = TRUE, win.size=200000)
-mat1 <- cbind(chrom@win.info[,'start'],
-               0, 
-               chrom@win.info[,'end'], 
-               chrom@win.info[,'variants']
-               )
-plot7 <- dr.plot( dmat = as.matrix( chrom@var.info[,c(2,3)] ), 
-                    rlst = list(mat1), 
-                    chrom.e = max_bp,
-                    dcol=c(rgb(34,139,34, maxColorValue = 255),
-                    rgb(0,206,209, maxColorValue = 255)) 
-                    )
-
 
 # loop over many files: 
 # files_path="/Users/kbillis/DATA_ANALYSIS_PHD/Synechococcus_elongatus_PCC_7942/PRJNA196229/"
-files_path="/Users/kbillis/DATA_ANALYSIS_PHD/Synechococcus_elongatus_PCC_7942/PRJNA404081/"
+# files_path="/Users/kbillis/DATA_ANALYSIS_PHD/Synechococcus_elongatus_PCC_7942/PRJNA404081/"
+files_path="/Users/kbillis/google_drive/myProjects/auth/snp/data/vcf_files_308/vcf_chr_ONLY/"
 only_files <- dir(path=files_path, pattern = "*NC_007604.vcf") 
+
+# remove 2 condtions that we didn't use: 
+only_files<-only_files[-c(5, 6)];
+
+# make whole file path
 files = paste(files_path, only_files, sep="")
-# par(mfrow = c(1, length(files)))
+
+
+mm<-NULL
 
 for (i in 1:length(files) ){
   vcf <- read.vcfR(files[i], verbose = TRUE )
   chrom <- create.chromR(name='NC_007604', vcf=vcf, seq=dna2, ann=gff3)
-  chrom <- proc.chromR(chrom, verbose = TRUE, win.size=50000)
+  chrom <- proc.chromR(chrom, verbose = TRUE, win.size=20000)
   mat1 <- cbind(chrom@win.info[,'start'],
                0, 
                chrom@win.info[,'end'], 
                chrom@win.info[,'variants']
                )
-  # plot7 <- dr.plot( dmat = as.matrix( chrom@var.info[,c(2,3)] ), 
-  #                  rlst = list(mat1), 
-  #                  chrom.e = max_bp,
-  #                  dcol=c(rgb(34,139,34, maxColorValue = 255),
-  #                  rgb(0,206,209, maxColorValue = 255)) 
-  #                  )            
-  # x<-melt(x)
-
 
   mat1<-data.frame(mat1)
   file_name_bars<-paste(only_files[i],"_b", sep="")
@@ -75,11 +60,90 @@ for (i in 1:length(files) ){
   }  
 }
 
+# remove additional strings: 
+colnames(mm)<-gsub("-sorted.bam_RMDUP.bam.raw.bcf.vcf.NC_007604.vcf_b", "", colnames(mm))
+# colnames(mm)<-gsub(".fastq.gz.vcf.NC_007604.vcf_b", "", colnames(mm))
 
+# metadata
+metadata_file = "/Users/kbillis/google_drive/myProjects/auth/snp/metadata/cyano_sample_id_sample_name.txt"
+metadata_hash <- read.table(metadata_file, sep=" ", quote="")
+for (i in 2:length(colnames(mm)) ) {
+  id<-as.name(colnames(mm)[i])
+  print(id)
+  print(metadata_hash[metadata_hash[,2]==id,1])
+  if (metadata_hash[metadata_hash[,2]==id,1]) {
+     name_data<-(metadata_hash[metadata_hash[,2]==id,1])
+     colnames(mm)[i]<-as.character(name_data)
+  } else {
+     print("not found")
+  }  
+}
+
+# order colnames:  
+mm<-mm[,order(colnames(mm))]
 
 df <- melt(mm, id.vars=c("break"), variable.name = "Samples", value.name="Values")
+
+# basic
 p <- ggplot(df, aes(df[,1],value)) + geom_line(aes(color= variable)) + facet_grid(variable ~ .)
 print(p)
+
+# colour based on condition
+ph <- ggplot(df, aes(df[,1],value, fill=variable)) + geom_bar(stat="identity") + facet_grid(variable ~ .) 
+
+# colour based the value (higher values different colours)
+ph <- ggplot(df, aes(df[,1],value, colour=value)) + geom_bar(stat="identity") + facet_grid(variable ~ .) + scale_colour_gradientn(colours=rainbow(4))
+
+
+
+
+
+# make ven diagrams: 
+metadata_file = "/Users/kbillis/google_drive/myProjects/auth/snp/metadata/cyano_sample_id_sample_name.txt"
+metadata_hash <- read.table(metadata_file, sep=" ", quote="")
+
+
+snpLists<-list()
+for (i in 1:length(files) ){
+  vcf <- read.vcfR(files[i], verbose = TRUE )
+  xx<-data.frame(vcf@fix[,2])
+
+  names_tobe<-as.name(only_files[i])
+  names_tobe<-gsub("-sorted.bam_RMDUP.bam.raw.bcf.vcf.NC_007604.vcf", "", names_tobe)
+  
+  print(names_tobe)
+  if (metadata_hash[metadata_hash[,2]==names_tobe,1]) {
+     name_data<-(metadata_hash[metadata_hash[,2]==names_tobe,1])
+     print(as.character(name_data) ) 
+  } else {
+     print("not found")
+  }  
+  print(as.character(name_data) ) 
+
+  DF <- data.frame(num=rep(name_data, dim(xx)[1]), stringsAsFactors=FALSE)
+  xx<-cbind(xx,DF)
+
+  if (i ==1) {
+    mmVenn<-xx
+  } else {
+    mmVenn<-rbind(mmVenn,xx)    
+  }
+
+  # names(snpLists <- paste0("W", seq_along(W))
+}
+
+colnames(mmVenn)[1]<-"position"
+colnames(mmVenn)[2]<-"condition"
+
+
+temp<-mmVenn[grep("Temp", mmVenn[,2]), ]
+plot(venneuler(temp))
+venneuler(temp)
+
+
+
+# end ven diagrams
+
 
 
 
@@ -114,6 +178,25 @@ p
 
 
 
+
+# get max length and prepare a list 
+max_bp=length(dna2)
+result <- vector("list", max_bp) 
+
+# paly
+chrom <- create.chromR(name='NC_007604', vcf=vcf, seq=dna2, ann=gff3)
+chrom <- proc.chromR(chrom, verbose = TRUE, win.size=200000)
+mat1 <- cbind(chrom@win.info[,'start'],
+               0, 
+               chrom@win.info[,'end'], 
+               chrom@win.info[,'variants']
+               )
+plot7 <- dr.plot( dmat = as.matrix( chrom@var.info[,c(2,3)] ), 
+                    rlst = list(mat1), 
+                    chrom.e = max_bp,
+                    dcol=c(rgb(34,139,34, maxColorValue = 255),
+                    rgb(0,206,209, maxColorValue = 255)) 
+                    )
 
 
 

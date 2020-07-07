@@ -51,7 +51,7 @@ if ($whatToPrint eq "snps_per_gene_per_condition") {
     # WHERE file_all_come from. 
     # $ awk '{print $3,$1}'  /Users/kbillis/google_drive/myProjects/auth/snp/data/where_is/*-sorted.bam_RMDUP.bam.raw.bcf.vcf.where_is_2.tab | grep -v "#" | sort |  uniq | wc
     # 3657    7314   76810
-    # $ wc  /Users/kbillis/google_drive/myProjects/auth/snp/data/where_is/snpPosition_locusTag.tab
+    # $ wc  /Users/kbillis/google_drive/myProjects/auth/s	np/data/where_is/snpPosition_locusTag.tab
     # 3657    7314   76810 /Users/kbillis/google_drive/myProjects/auth/snp/data/where_is/snpPosition_locusTag.tab
     # 1000769 Intergenic
     # 1000769 Synpcc7942_0992

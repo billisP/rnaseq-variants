@@ -27,7 +27,7 @@ foreach my $vcf_f (@vcf_files) {
     #   print "command failed: $!\n";
     # } 
     # $vcf_f = $vcf;
-     
+    
     open(IN,  "$vcf_f")  or die($!);
         while (<IN>) {
             chomp;
@@ -38,7 +38,6 @@ foreach my $vcf_f (@vcf_files) {
             if ($snp{$dataSNP[1]}) {
                 @tmpArray = @{$snp{$dataSNP[1]}};
                 push(@tmpArray, $_ ); 
-                 
                 @{$snp{$dataSNP[1]}} = @tmpArray;   
             } else {
                 # my @tmpArray = $snp{$dataSNP[1]} ;    
@@ -53,10 +52,10 @@ foreach my $vcf_f (@vcf_files) {
 for (keys %snp) {
     my @val_array = @{$snp{$_}};
     if (scalar(@val_array) >12) {
-        print "key is $_ exists " . scalar(@val_array) . "\n";
+        # print "key is $_ exists " . scalar(@val_array) . "\n";
         foreach my $tmp (@val_array) {
             my @dataPrint = split(/\t/, $tmp);
-            print  $dataPrint[0] . "\t" .  $dataPrint[1] . "\t" . $dataPrint[3] . "\t" . $dataPrint[4] . "\n" ;
+            # print  $dataPrint[0] . "\t" .  $dataPrint[1] . "\t" . $dataPrint[3] . "\t" . $dataPrint[4] . "\n" ;
             
         }
     }
